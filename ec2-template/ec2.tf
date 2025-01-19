@@ -20,17 +20,6 @@ resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-resource "aws_instance" "app_server" {
-  ami           = "ami-08d70e59c07c61a3a"
-  instance_type = "t2.micro"
-
-  iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
-
-  tags = {
-    Name = "ExampleAppServerInstance"
-  }
-}
-
 resource "aws_instance" "ec2" {
 
   ami           = "ami-08d70e59c07c61a3a"
