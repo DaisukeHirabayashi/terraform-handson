@@ -1,14 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.84.0"
-    }
-  }
-
-  required_version = ">= 1.2.0"
-}
-
 provider "aws" {
   region  = "us-west-2"
 }
@@ -28,11 +17,6 @@ resource "aws_iam_role" "ssm_role" {
       },
     ]
   })
-}
-
-resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
-  role       = aws_iam_role.ssm_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_instance" "app_server" {
