@@ -31,6 +31,21 @@ resource "aws_instance" "app_server" {
   }
 }
 
+resource "aws_instance" "ec2" {
+
+  ami           = "ami-08d70e59c07c61a3a"
+  instance_type = "t2.micro"
+
+  vpc_security_group_ids = [aws_vpc.main.default_security_group_id]
+  subnet_id              = aws_subnet.public.id
+
+  iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
+
+  tags = {
+    Name = var.service_name
+  }
+}
+
 resource "aws_iam_instance_profile" "ssm_instance_profile" {
   name = "ssm_instance_profile"
   role = aws_iam_role.ssm_role.name
