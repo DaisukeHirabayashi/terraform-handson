@@ -64,6 +64,12 @@ resource "aws_api_gateway_resource" "cat" {
   path_part   = "cat"
 }
 
+resource "aws_api_gateway_resource" "dog" {
+  rest_api_id = aws_api_gateway_rest_api.private.id
+  parent_id   = aws_api_gateway_resource.cat.id
+  path_part   = "dog"
+}
+
 resource "aws_api_gateway_method" "get_method" {
   rest_api_id   = aws_api_gateway_rest_api.private.id
   resource_id   = aws_api_gateway_resource.cat.id
