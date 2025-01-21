@@ -123,14 +123,6 @@ resource "aws_api_gateway_method" "get_dog" {
   authorization = "NONE"
 }
 
-resource "aws_lambda_permission" "api_gateway_invoke" {
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.my_lambda_function.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.private.execution_arn}/*/${aws_api_gateway_method.get_dog.http_method}${aws_api_gateway_resource.dog.path}"
-}
-
 resource "aws_api_gateway_integration" "lambda_integration" {
   rest_api_id             = aws_api_gateway_rest_api.private.id
   resource_id             = aws_api_gateway_resource.dog.id
@@ -168,9 +160,7 @@ resource "aws_api_gateway_deployment" "develop" {
     #       resources will show a difference after the initial implementation.
     #       It will stabilize to only change when resources change afterwards.
     redeployment = sha1(jsonencode([
-      aws_api_gateway_resource.cat.id,
-      aws_api_gateway_method.get_method.id,
-      aws_api_gateway_integration.cat_integration,
+      data.archive_file.zip.output_base64sha256
     ]))
   }
 
