@@ -17,7 +17,8 @@ resource "aws_iam_role" "lambda_role" {
 
 data "archive_file" "zip" {
   type        = "zip"
-  source_dir  = "lambda/src"
+#   source_dir  = "lambda/src"
+  source_file = "lambda/src/lambda_function.py"
   output_path = "lambda/src/test_terraform.zip"
 }
 
