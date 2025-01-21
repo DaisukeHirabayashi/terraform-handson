@@ -58,16 +58,11 @@ data "aws_iam_policy_document" "private_api" {
   }
 }
 
+# cat
 resource "aws_api_gateway_resource" "cat" {
   rest_api_id = aws_api_gateway_rest_api.private.id
   parent_id   = aws_api_gateway_rest_api.private.root_resource_id
   path_part   = "cat"
-}
-
-resource "aws_api_gateway_resource" "dog" {
-  rest_api_id = aws_api_gateway_rest_api.private.id
-  parent_id   = aws_api_gateway_resource.cat.id
-  path_part   = "dog"
 }
 
 resource "aws_api_gateway_method" "get_method" {
@@ -112,6 +107,53 @@ resource "aws_api_gateway_integration_response" "response_200" {
 }
 EOF  
   }
+}
+
+# dog
+resource "aws_api_gateway_resource" "dog" {
+  rest_api_id = aws_api_gateway_rest_api.private.id
+  parent_id   = aws_api_gateway_resource.cat.id
+  path_part   = "dog"
+}
+
+resource "aws_api_gateway_method" "get_dog" {
+  rest_api_id   = aws_api_gateway_rest_api.private.id
+  resource_id   = aws_api_gateway_resource.dog.id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+
+resource "aws_lambda_permission" "api_gateway_invoke" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.my_lambda_function.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.private.execution_arn}/*/${aws_api_gateway_method.get_dog.http_method}${aws_api_gateway_resource.dog.path}"
+}
+
+resource "aws_api_gateway_integration" "lambda_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.private.id
+  resource_id             = aws_api_gateway_resource.dog.id
+  http_method             = aws_api_gateway_method.get_dog.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.my_lambda_function.invoke_arn
+}
+
+resource "aws_api_gateway_method_response" "response_dog_200" {
+  rest_api_id = aws_api_gateway_rest_api.private.id
+  resource_id = aws_api_gateway_resource.dog.id
+  http_method = aws_api_gateway_method.get_dog.http_method
+  status_code = "200"
+}
+
+resource "aws_api_gateway_integration_response" "integration_response_200" {
+  rest_api_id  = aws_api_gateway_rest_api.private.id
+  resource_id  = aws_api_gateway_resource.dog.id
+  http_method  = aws_api_gateway_method.get_dog.http_method
+  status_code  = "200"
+
+  depends_on = [ aws_api_gateway_integration.lambda_integration ]
 }
 
 resource "aws_api_gateway_deployment" "develop" {
