@@ -15,6 +15,12 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
+data "archive_file" "zip" {
+  type        = "zip"
+  source_dir  = "lambda/src"
+  output_path = "lambda/src/test_terraform.zip"
+}
+
 resource "aws_iam_policy_attachment" "lambda_policy_attach" {
   name       = "lambda_policy_attach"
   roles      = [aws_iam_role.lambda_role.name]
@@ -27,6 +33,6 @@ resource "aws_lambda_function" "my_lambda_function" {
   runtime       = "python3.8"  # 使用するPythonのバージョンを選択
   role          = aws_iam_role.lambda_role.arn
 
-  source_code_hash = filebase64sha256("lambda_function.zip")  # zipファイルを指定
-  filename        = "lambda_function.zip"  # zipファイルのパス
+  source_code_hash = data.archive_file.zip.output_base64sha256  # zipファイルを指定
+  filename        = data.archive_file.zip.output_path  # zipファイルのパス
 }
