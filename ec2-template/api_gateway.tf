@@ -164,6 +164,10 @@ resource "aws_api_gateway_deployment" "develop" {
     ]))
   }
 
+  depends_on = [
+    aws_lambda_function.my_lambda_function
+  ]
+
   lifecycle {
     create_before_destroy = true
   }
